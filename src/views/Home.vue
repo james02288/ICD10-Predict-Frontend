@@ -1,6 +1,9 @@
 <template>
   <div class="home">
-    <div class="mb-4" style="height: 56px"></div>
+    <div
+      class="mb-4"
+      style="height: 56px"
+    ></div>
     <div class="container-fluid">
       <div class="row">
         <div class="col-lg-6">
@@ -23,10 +26,7 @@
                 v-bind:class="{ disabled: disabled }"
                 v-on:click="predict"
               >
-                <span>Predict</span
-                ><span v-if="disabled">ing...</span>&nbsp;<span v-if="!disabled"
-                  >Now</span
-                >
+                <span>Predict</span><span v-if="disabled">ing...</span>&nbsp;<span v-if="!disabled">Now</span>
                 <div
                   class="spinner-border text-light spinner-border-sm"
                   role="status"
@@ -63,18 +63,24 @@
                 <tr
                   v-for="(item, index) in result"
                   :key="index"
-                  v-bind:class="{ 'table-success': item.mark }"
+                  :style="background(item.probability, item.mark)"
                 >
                   <th scope="row">{{ index + 1 }}</th>
                   <td>{{ item.code }}</td>
                   <td>{{ item.title }}</td>
-                  <td>{{ item.probability }}</td>
+                  <td>{{ (item.probability*100).toFixed(3) }}%</td>
                 </tr>
               </tbody>
             </table>
           </div>
-          <div class="text-center" v-else-if="predicting">
-            <div class="spinner-border" role="status">
+          <div
+            class="text-center"
+            v-else-if="predicting"
+          >
+            <div
+              class="spinner-border"
+              role="status"
+            >
               <span class="sr-only">Loading...</span>
             </div>
           </div>
@@ -85,33 +91,41 @@
 </template>
 
 <script>
-export default {
-  name: "Home",
-  data() {
-    return {
-      disabled: false,
-      predicting: false,
-      medical_record: "",
-      result: null
-    };
-  },
-  methods: {
-    predict: function() {
-      this.disabled = true;
-      this.predicting = true;
-      this.$http
-        .post("http://localhost:8888/api/predict", {
-          pre_data: this.medical_record
-        })
-        .then(response => {
-          this.result = response.data.data;
-          this.predicting = false;
-          this.disabled = false;
-        })
-        .catch(err => {
-          console.log(err);
-        });
+  export default {
+    name: "Home",
+    data() {
+      return {
+        disabled: false,
+        predicting: false,
+        medical_record: "",
+        result: null
+      };
+    },
+    methods: {
+      predict: function() {
+        this.disabled = true;
+        this.predicting = true;
+        this.$http
+          .post("http://localhost:8888/api/predict", {
+            pre_data: this.medical_record
+          })
+          .then(response => {
+            this.result = response.data.data;
+            this.predicting = false;
+            this.disabled = false;
+          })
+          .catch(err => {
+            console.log(err);
+          });
+      },
+      background(predicting, mark) {
+        return (
+          "background: rgba(" +
+          (mark ? "195, 230, 203, " : "245, 198, 203, ") +
+          predicting +
+          ")"
+        );
+      }
     }
-  }
-};
+  };
 </script>
